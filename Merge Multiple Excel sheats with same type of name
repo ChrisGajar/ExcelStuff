@@ -1,0 +1,45 @@
+def consulta_(path):#METHOD THAT USE ONLY THE PATH OF A FOLDER FOR WORK IN MERGE DIFERENT EXCEL DATA SHEETS WITH THE SAME TYPE OF NAME
+    import numpy as np
+    import os #USE THE "OS" LIB TO USE THE "LISTDIRM" METHOD WITH THIS YOU CAN JOUN THE DATA SHEETS IN A FOLDER, AND USE THE PATH OF THE FOLDER FOR WORK
+    from pathlib import Path
+    dname=Path(path)
+    names=os.listdir(dname)#LIST THE NAMES OF EXCEL DATA SHEETS
+    arch=[]#INITIALIZE A LIST THATS CONTAIN THE MERGE EXCEL DATA SHEETS
+    for n in names:
+
+        ruta=Path(dname,n)#PATH OF each one of excel data sheets
+        import pandas as pd
+        archivo=pd.read_excel(ruta,sheet_name='Datos del informe')#
+        archivo.columns=archivo.loc[0]
+        archivo= archivo.loc[1:]
+#JUST PERSONAL TRANSFORM IN DATA
+        col_elim=['Tiempo total (hh:mm)',
+                  'Promedio de diésel con motor en marcha (l/100\xa0km)',
+                  'Promedio de conducción (km/h)',
+                  'Ralentí (%)','PTO (%)',
+                  'En punto muerto (%)',
+                  'Programador de velocidad (%)']
+        archivo=archivo.drop(columns=col_elim)
+        archivo.columns=['codigo_interno','km','lt']
+        archivo['km']=archivo['km'].astype(float)
+        archivo['lt']=archivo['lt'].astype(float)
+        archivo['Rendimiento']=archivo['km']/archivo['lt']
+        archivo.drop(archivo[archivo['codigo_interno']=='Todos:'].index,inplace=True)
+        archivo=archivo.dropna()
+        año=[int(str(n)[6:8])+2000]
+        mes=[str(n)[8:10]]
+        archivo['mes']=int(n[8:10])
+        archivo['año']=int(n[6:8])+2000
+#JUST PERSONAL TRANSFORM IN DATA
+        arch.append(archivo)
+        #print(año,mes,archivo.columns)
+        #print(archivo.head())
+        ach=pd.concat(arch,axis=0,ignore_index=True)
+        
+    
+    return ach
+
+import pandas as pd
+path=r'C:\Users\cgajar\OneDrive - Nazar Corp\Documentos\BSC\volvo\data'
+tabla=consulta_(path)
+tabla[0:313]
